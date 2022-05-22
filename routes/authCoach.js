@@ -1,15 +1,16 @@
 const router = require( 'express' ).Router() ;
 const mongoose = require('mongoose') ;
-const User = require( '../model/User' ) ;
+const Coach = require( '../model/Coach' ) ;
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const number = require('@hapi/joi/lib/types/number');
 
-let nxt_ip = 1 ;
+let  nxt_ip = 1 ;
 
 router.post( '/register' ,async ( req , res ) =>{
 
     // check if the user in the database ;
-    const emailExsit = await User.findOne({ email: req.body.email }) ;
+    const emailExsit = await Coach.findOne({ email: req.body.email }) ;
     if( emailExsit ){
         return res.status( 400 ).send( 'Email already exists'  ) ;
     }
@@ -20,12 +21,14 @@ router.post( '/register' ,async ( req , res ) =>{
     const hashPassword = await bcrypt.hash( req.body.password , salt ) ;
     
     nxt_ip++ ;
-    const user = new User({
+    const user = new Coach({
         id:nxt_ip,
         name: req.body.name,
         email: req.body.email ,
         password: hashPassword 
     });
+
+    
 
     try{
         const saveUser = await user.save() ;
@@ -40,7 +43,7 @@ router.post( '/register' ,async ( req , res ) =>{
 router.post('/login',async ( req , res )=>{
         
     // check if the user in the database ;
-    const user = await User.findOne({ email: req.body.email }) ;
+    const user = await Coach.findOne({ email: req.body.email }) ;
     if( !user ){
         return res.status( 400 ).send( 'Email not exists in BD'  ) ;
     }
@@ -56,10 +59,9 @@ router.post('/login',async ( req , res )=>{
     
 }) ;
 
-
 router.get('/user/:id',  async ( req , res ) =>{
     
-    const user = await User.findOne({ id: req.params.id }) ;
+    const user = await Coach.findOne({ id: req.params.id }) ;
     if( !user ){
         return res.status( 400 ).send( 'ID not exists in BD'  ) ;
     }
@@ -70,25 +72,24 @@ router.get('/user/:id',  async ( req , res ) =>{
 
 router.get('/alluser',  async ( req , res ) =>{
     
-    const user = await User.find() ;
+    const user = await Coach.find() ;
     if( !user ){
         return res.status( 400 ).send( 'Email not exists in BD'  ) ;
     }
 
     console.log( " i am found user " ) ;
     res.send( user ) ;
-}) ;
-
+});
 
 router.delete( '/user/:id' , async ( req , res ) =>{
     
-    const user = await User.findOne({ id: req.params.id }) ;
+    const user = await Coach.findOne({ id: req.params.id }) ;
     if( !user ){
         return res.status( 400 ).send( 'ID not exists in BD'  ) ;
     }  
 
     try {
-        const removedProject = await User.remove({
+        const removedProject = await Coach.remove({
             id: req.params.id
         })
         res.json(removedProject)
@@ -102,14 +103,14 @@ router.delete( '/user/:id' , async ( req , res ) =>{
 
 router.put( '/user/:id' , async ( req , res ) =>{
    
-    const exsit = await User.findOne({ id: req.params.id }) ;
+    const exsit = await Coach.findOne({ id: req.params.id }) ;
     if( !exsit ){
         return res.status( 400 ).send( 'ID not exists in BD'  ) ;
     }  
 
 
     try {
-        const removedProject = await User.remove({
+        const removedProject = await Coach.remove({
             id: req.params.id
         })
         // res.json(removedProject)
@@ -123,7 +124,7 @@ router.put( '/user/:id' , async ( req , res ) =>{
     const salt = await bcrypt.genSalt( 10 ) ;
     const hashPassword = await bcrypt.hash( req.body.password , salt ) ;
 
-    const user = new User({
+    const user = new Coach({
         id:exsit.id,
         name: req.body.name,
         email: req.body.email ,
