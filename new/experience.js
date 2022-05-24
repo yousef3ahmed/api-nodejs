@@ -1,13 +1,19 @@
-//defining schema
-
 
 const mongoose = require('mongoose');
 
-mongoose.connect("mongodb://localhost:27017/project");
 const ExperienceSchema=  mongoose.Schema({
-    
-    name: String,
-    by: String
+    name:{
+        type: String,
+        require: true,
+        min : 6,
+        max:255
+    },
+    by:{
+        type: String,
+        require: true,
+        max : 255,
+        min:6 
+    }
    });
 
 module.exports= mongoose.model("experience",ExperienceSchema);
