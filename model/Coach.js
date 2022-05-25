@@ -28,7 +28,7 @@ const userSchema = mongoose.Schema({
         type: Date,
         default: Date.now
     },
-    //coachAdmin to remove coaches
+    //coachAdmin 
     isAdmin:{
         type:Boolean,
         require:true

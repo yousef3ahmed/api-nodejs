@@ -1,5 +1,5 @@
 const router = require( 'express' ).Router() ;
-const verify = require('./vertifyToken');
+const verify = require('../MiddleWares/vertifyToken');
 
 router.get('/' , verify , (req , res)=>{
     res.json({

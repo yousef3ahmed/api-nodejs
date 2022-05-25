@@ -1,9 +1,7 @@
 const router = require( 'express' ).Router() ;
-const mongoose = require('mongoose') ;
 const Coach = require( '../model/Coach' ) ;
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const number = require('@hapi/joi/lib/types/number');
 const admin =require('../MiddleWares/beAdmin');
 const confirm = require('../MiddleWares/vertifyToken.js');
 let  nxt_ip = 1 ;
@@ -103,7 +101,7 @@ router.delete( '/user/:id' ,[confirm, admin], async ( req , res ) =>{
 
 });
 
-router.put( '/user/:id' , async ( req , res ) =>{
+router.put( '/user/:id' , [ confirm ], async ( req , res ) =>{
    
     const exsit = await Coach.findOne({ id: req.params.id }) ;
     if( !exsit ){
@@ -130,50 +128,20 @@ router.put( '/user/:id' , async ( req , res ) =>{
         id:exsit.id,
         name: req.body.name,
         email: req.body.email ,
-        password: hashPassword 
+        password: hashPassword ,
+        isAdmin : req.body.isAdmin
     });
 
     try{
         const saveUser = await user.save() ;
         res.send( "Update Dn" ) ; 
-        // res.send({ user: user._id }) ;  
+        // res.send(user) ;  
     }catch( err ){
         res.status( 400 ).send( err ) ;
     }
 
 });
 
-
-/*Delet user*/
-router.delete("/:id", [confirm,admin] , async(req,res)=>{
-    const findUser = await Coach.findByIdAndRemove(req.params.id)
-    if(!findUser){
-        res.send("user not found");
-    }
-    res.send('deleted done !');
-})
-
-router.get("/",[confirm],(req , res, next)=>{
-
-    res.send('home page');
-
-});
-/*GET activity page*/
-router.get('/activity',[confirm] ,( req , res )=>{
-    res.send("notification page") ;
-}) ;
-/*GET schedule page*/
-router.get('/schedule', [confirm],( req , res )=>{
-    res.send("schedule page") ;
-}) ;
-/*GET info page*/
-router.get('/info',[confirm], ( req , res )=>{
-    res.send("info page") ;
-}) ;
-/*GET logout page*/
-router.get('/logout',[confirm], ( req , res )=>{
-    res.send("logout page") ;
-}) ;
 
 
 module.exports = router ;
