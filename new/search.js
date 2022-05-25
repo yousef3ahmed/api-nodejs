@@ -1,37 +1,22 @@
-const express = require('express');
-require("./config");   //database connection 
-const mongoose = require('mongoose');
-mongoose.connect("mongodb://localhost:27017/project", ()=> {console.log("hello")});
-const Experience = require('./experience');  //model(schema)
-const app = express();
+const express = require( 'express' );
+const router = express.Router();
+const Experience = require('/experience'); 
 
-
-
-
-app.use(express.json());
-
-app.get("/search/:key",async (req,resp)=>{
-    const data = new Experience({name:"swim", by:"coach"});
+router.post("/coaches",async(req,res)=>{
+    const data = new Experience({name:req.body.name, by:req.body.by});
     const saveUser = await data.save() ;
-
-    let output = await Experience.find(             
-                {name:req.params.key}         
-    )
-
-    //resp.send("Hello!"); 
-    resp.send({saveUser});
-    
+    res.send('inserted');
 })
-
-
-
-app.listen(5000)
-
-/*let data = await Experience.find( 
+router.get("/search/:key",async (req,resp)=>{
+    let data = await Experience.find( 
         {
             "$or":[
                 {name:{$regex:req.params.key}},
                 {by:{$regex:req.params.key}}
             ]
         }
-    )*/
+    )
+    resp.send(data);
+})
+
+module.exports = router ;
