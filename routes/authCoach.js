@@ -4,7 +4,8 @@ const Coach = require( '../model/Coach' ) ;
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const number = require('@hapi/joi/lib/types/number');
-
+const admin =require('../MiddleWares/beAdmin');
+const confirm = require('../MiddleWares/vertifyToken.js');
 let  nxt_ip = 1 ;
 
 router.post( '/register' ,async ( req , res ) =>{
@@ -25,7 +26,8 @@ router.post( '/register' ,async ( req , res ) =>{
         id:nxt_ip,
         name: req.body.name,
         email: req.body.email ,
-        password: hashPassword 
+        password: hashPassword ,
+        isAdmin: req.body.isAdmin
     });
 
     
@@ -54,7 +56,7 @@ router.post('/login',async ( req , res )=>{
 
 
     // create and assgin a token ;
-    const token = jwt.sign({_id: user._id} , process.env.TOKEN_SECRET );
+    const token = jwt.sign({_id: user._id,  isAdmin:user.isAdmin} , process.env.TOKEN_SECRET );
     res.header('auth-token' , token ).send( "login Dn" ) ;
     
 }) ;
@@ -81,11 +83,11 @@ router.get('/alluser',  async ( req , res ) =>{
     res.send( user ) ;
 });
 
-router.delete( '/user/:id' , async ( req , res ) =>{
+router.delete( '/user/:id' ,[confirm, admin], async ( req , res ) =>{
     
     const user = await Coach.findOne({ id: req.params.id }) ;
     if( !user ){
-        return res.status( 400 ).send( 'ID not exists in BD'  ) ;
+        return res.status( 400 ).send( 'ID not exists in DB'  ) ;
     }  
 
     try {
@@ -141,6 +143,37 @@ router.put( '/user/:id' , async ( req , res ) =>{
 
 });
 
+
+/*Delet user*/
+router.delete("/:id", [confirm,admin] , async(req,res)=>{
+    const findUser = await Coach.findByIdAndRemove(req.params.id)
+    if(!findUser){
+        res.send("user not found");
+    }
+    res.send('deleted done !');
+})
+
+router.get("/",[confirm],(req , res, next)=>{
+
+    res.send('home page');
+
+});
+/*GET activity page*/
+router.get('/activity',[confirm] ,( req , res )=>{
+    res.send("notification page") ;
+}) ;
+/*GET schedule page*/
+router.get('/schedule', [confirm],( req , res )=>{
+    res.send("schedule page") ;
+}) ;
+/*GET info page*/
+router.get('/info',[confirm], ( req , res )=>{
+    res.send("info page") ;
+}) ;
+/*GET logout page*/
+router.get('/logout',[confirm], ( req , res )=>{
+    res.send("logout page") ;
+}) ;
 
 
 module.exports = router ;
